@@ -32,7 +32,7 @@ func connectDB() *mongo.Collection {
 	}
 
 	fmt.Println("Connected to MongoDB!")
-	testDB := client.Database("ibuYemekBotu").Collection("users")
+	testDB := client.Database(os.Getenv("DATABASE")).Collection(os.Getenv("COLLECTION"))
 
 	return testDB
 }
