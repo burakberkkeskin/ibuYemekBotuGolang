@@ -16,7 +16,7 @@ func telegramHandler() {
 
 	bot, err := tgbotapi.NewBotAPI(os.Getenv("TELEGRAM_BOT_TOKEN"))
 	if err != nil {
-		log.Panic(err)
+		log.Panic("Telegram Bot Not Found: ", err)
 	}
 
 	bot.Debug = true
