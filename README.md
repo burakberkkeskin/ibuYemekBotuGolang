@@ -2,4 +2,4 @@ Bolu Abant Ä°zzet Baysal Universitesi Yemekhane Listesini Mesaj Olarak AlabildiÄ
 
 Telegram Link: t.me/ibu_yemek_bot
 
-Docker Image: safderun/ibu-yemek-botu:golang
+Docker Image: safderun/ibu-yemek-botu

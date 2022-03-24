@@ -1,4 +1,4 @@
-package main
+package services
 
 import (
 	"fmt"
@@ -12,7 +12,7 @@ import (
 	"github.com/robfig/cron/v3"
 )
 
-func telegramHandler() {
+func TelegramHandler() {
 
 	bot, err := tgbotapi.NewBotAPI(os.Getenv("TELEGRAM_BOT_TOKEN"))
 	if err != nil {

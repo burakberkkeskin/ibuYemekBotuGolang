@@ -5,7 +5,6 @@ go 1.18
 require github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
 
 require (
-	//github.com/joho/godotenv v1.4.0
 
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
