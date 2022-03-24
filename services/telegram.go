@@ -81,7 +81,7 @@ func TelegramHandler() {
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, helloMessage)
 				bot.Send(msg)
 			} else if update.Message.Text == "/source" {
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "https://github.com/safderun/ibuYemekBotu")
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "https://github.com/safderun/ibuYemekBotuGolang")
 				bot.Send(msg)
 			} else if update.Message.Text == "/subscribe" {
 				if mongo.GetUser(update.Message.Chat.ID) == false {
