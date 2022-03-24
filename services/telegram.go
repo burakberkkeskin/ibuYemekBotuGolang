@@ -1,7 +1,6 @@
 package services
 
 import (
-	"fmt"
 	"ibuYemekBotu/models"
 	"ibuYemekBotu/mongo"
 	"log"
@@ -85,8 +84,7 @@ func TelegramHandler() {
 				bot.Send(msg)
 			} else if update.Message.Text == "/subscribe" {
 				if mongo.GetUser(update.Message.Chat.ID) == false {
-					user := models.User{update.Message.Chat.ID, update.Message.Chat.UserName, "", true}
-					fmt.Println(user)
+					user := models.User{ChatId: update.Message.Chat.ID, Username: update.Message.Chat.UserName, Name: update.Message.Chat.FirstName, IsSubscribed: true}
 					mongo.Adduser(&user)
 					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Abone oldunuz.")
 					bot.Send(msg)
@@ -139,7 +137,7 @@ func sendListSubscribers(lunchList string, bot *tgbotapi.BotAPI) {
 func getLunchList(day string) string {
 	log.Println("Getting lunch list of " + day)
 	lunch := scrapper(day)
-	emptyLunch := models.Lunch{"", "", "", "", ""}
+	emptyLunch := models.Lunch{Corba: "", AnaYemek: "", YardimciAnaYemek: "", YanYemek1: "", YanYemek2: ""}
 	if lunch == emptyLunch {
 		return ""
 	}

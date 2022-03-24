@@ -46,7 +46,7 @@ func scrapper(day string) models.Lunch {
 	res := re.FindAllStringSubmatch(html, -1)
 
 	if res == nil {
-		return models.Lunch{"", "", "", "", ""}
+		return models.Lunch{Corba: "", AnaYemek: "", YardimciAnaYemek: "", YanYemek1: "", YanYemek2: ""}
 	} else {
 		lunch := models.Lunch{
 			Corba:            res[0][1],
