@@ -1,8 +1,11 @@
 package models
 
+import "go.mongodb.org/mongo-driver/bson/primitive"
+
 type User struct {
-	ChatId       int64
-	Username     string
-	Name         string
-	IsSubscribed bool
+	ID           primitive.ObjectID `json:"id,omitempty"`
+	ChatID       int64              `json:"chatID,omitempty" validate:"required"`
+	Username     string             `json:"username,omitempty" validate:"required"`
+	Name         string             `json:"name,omitempty" validate:"required"`
+	IsSubscribed bool               `json:"isSubscribed,omitempty" validate:"required"`
 }

@@ -39,7 +39,7 @@ func TelegramHandler() {
 	})
 
 	c.AddFunc("00 06 * * *", func() {
-		sendListSubscribers(lunchListToday, bot)
+		sendListSubscribers(&lunchListToday, bot)
 	})
 
 	c.Start()
@@ -84,7 +84,7 @@ func TelegramHandler() {
 				bot.Send(msg)
 			} else if update.Message.Text == "/subscribe" {
 				if mongo.GetUser(update.Message.Chat.ID) == false {
-					user := models.User{ChatId: update.Message.Chat.ID, Username: update.Message.Chat.UserName, Name: update.Message.Chat.FirstName, IsSubscribed: true}
+					user := models.User{ChatID: update.Message.Chat.ID, Username: update.Message.Chat.UserName, Name: update.Message.Chat.FirstName, IsSubscribed: true}
 					mongo.Adduser(&user)
 					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Abone oldunuz.")
 					bot.Send(msg)
@@ -94,9 +94,13 @@ func TelegramHandler() {
 				}
 			} else if update.Message.Text == "/unsubscribe" {
 				if mongo.GetUser(update.Message.Chat.ID) == true {
-					mongo.DeleteUser(update.Message.Chat.ID)
-					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Abonelikten çıktınız.")
-					bot.Send(msg)
+					if mongo.DeleteUser(update.Message.Chat.ID) {
+						msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Abonelikten çıktınız.")
+						bot.Send(msg)
+					} else {
+						msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Bir Hata Oluştu.")
+						bot.Send(msg)
+					}
 				} else {
 					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Zaten abonelikten çıktınız.")
 					bot.Send(msg)
@@ -120,14 +124,13 @@ func TelegramHandler() {
 	}
 }
 
-func sendListSubscribers(lunchList string, bot *tgbotapi.BotAPI) {
+func sendListSubscribers(lunchList *string, bot *tgbotapi.BotAPI) {
 	log.Println("Sending list to subscribers")
-	if lunchList == "" {
+	if *lunchList == "" {
 		log.Println("Lunch list is empty")
 	} else {
-		userList := mongo.GetAllUsers()
-		for _, user := range userList {
-			msg := tgbotapi.NewMessage(user.ChatId, lunchList)
+		for _, user := range *mongo.GetAllUsers() {
+			msg := tgbotapi.NewMessage(user.ChatID, *lunchList)
 			bot.Send(msg)
 		}
 		log.Println("List sent")

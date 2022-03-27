@@ -4,18 +4,22 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"ibuYemekBotu/models"
 	"log"
 	"os"
 	"time"
 
+	"ibuYemekBotu/models"
+
+	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func connectDB() *mongo.Collection {
+func ConnectDB() *mongo.Client {
+	getEnv()
 	fmt.Println("Connecting to MongoDB")
+
 	clientOptions := options.Client().ApplyURI(os.Getenv("MONGODB_URI"))
 	client, err := mongo.Connect(context.TODO(), clientOptions)
 
@@ -31,70 +35,97 @@ func connectDB() *mongo.Collection {
 	}
 
 	fmt.Println("Connected to MongoDB!")
-	testDB := client.Database(os.Getenv("DATABASE")).Collection(os.Getenv("COLLECTION"))
+	//testDB := client.Database(os.Getenv("DATABASE")).Collection(os.Getenv("COLLECTION"))
 
-	return testDB
+	return client
 }
+
+var Client *mongo.Client = ConnectDB()
+
+func GetCollection(client *mongo.Client, databaseName string, collectionName string) *mongo.Collection {
+	collection := client.Database(databaseName).Collection(collectionName)
+	return collection
+}
+
+var userCollection *mongo.Collection = GetCollection(Client, os.Getenv("DATABASE"), os.Getenv("COLLECTION"))
 
 func Adduser(user *models.User) {
-	collection := connectDB()
-	insertResult, err := collection.InsertOne(context.TODO(), user)
 
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	insertResult, err := userCollection.InsertOne(ctx, user)
 	if err != nil {
-		log.Fatal(err)
+		log.Println("Error While Inserting User: ", err)
 	}
 
-	fmt.Println("Inserted 1 document: ", insertResult.InsertedID)
+	fmt.Println("Inserted 1 User: ", insertResult.InsertedID)
 }
 
-func GetAllUsers() []models.User {
-	collection := connectDB()
-	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
-	cur, err := collection.Find(ctx, bson.D{})
+func GetAllUsers() *[]models.User {
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	cur, err := userCollection.Find(ctx, bson.D{})
 	if err != nil {
-		log.Fatal("Hata : " + err.Error())
+		log.Fatal("Error While Getting All Users: " + err.Error())
 	}
+
 	defer cur.Close(ctx)
-	var list []models.User
+
+	var userList []models.User
 	for cur.Next(ctx) {
 		var result models.User
 		err := cur.Decode(&result)
 		if err != nil {
-			log.Fatal("Hata : " + err.Error())
+			log.Fatal("Error While Decoding Results While Getting All Users : " + err.Error())
 		}
-		list = append(list, result)
+		userList = append(userList, result)
 	}
+
 	if err := cur.Err(); err != nil {
-		log.Fatal("Hata : " + err.Error())
+		log.Fatal("Error While Getting All Users : " + err.Error())
 	}
-	fmt.Println(list)
-	return list
+
+	return &userList
 }
 
 func GetUser(chatid int64) bool {
-	collection := connectDB()
+
 	var result models.User
-	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
-	err := collection.FindOne(ctx, bson.M{"chatid": chatid}).Decode(&result)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	err := userCollection.FindOne(ctx, bson.M{"chatid": chatid}).Decode(&result)
 	if err != nil {
+		log.Println("Search Error : " + err.Error())
 		return false
-		//log.Fatal("Search Error : " + err.Error())
 	}
+
 	out, err := json.Marshal(&result)
 	if err != nil {
+		log.Println("No User Found : " + err.Error())
 		return false
-		//log.Fatal("No Found : " + err.Error())
 
 	}
-	fmt.Println("Found User: " + string(out))
+	fmt.Println("User Found: " + string(out))
 	return true
 }
 
-func DeleteUser(chatid int64) {
-	collection := connectDB()
-	_, err := collection.DeleteOne(context.TODO(), bson.D{{"chatid", chatid}})
+func DeleteUser(chatid int64) bool {
+	_, err := userCollection.DeleteOne(context.TODO(), bson.D{{Key: "chatid", Value: chatid}})
 	if err != nil {
-		log.Fatal("Hata : " + err.Error())
+		log.Println("Hata : " + err.Error())
+		return false
 	}
 	fmt.Println("User deleted")
+	return true
+}
+
+func getEnv() {
+	err := godotenv.Load(".envDev")
+	if err != nil {
+		log.Println("Error loading .env file")
+	}
 }
