@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ibu-yemek-botu-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ibuyemekbotu-dev
+  template:
+    metadata:
+      labels:
+        app: ibuyemekbotu-dev
+    spec:
+      containers:
+      - name: ibu-yemek-botu
+        image: safderun/ibu-yemek-botu
+        env:
+        - name: TELEGRAM_BOT_TOKEN
+          value: 2117224074:AAHV3BQq_eEwhvUu1P9FiXVi3D_BZB5Hf4Y
+        - name: MONGODB_URI
+          value: mongodb+srv://admin:gus2ci3fn5hysin@ibuyemekbotu.qbdiv.mongodb.net/ibuYemekBotu?retryWrites=true&w=majority
+        - name: DATABASE
+          value: test
+        - name: COLLECTION  
+          value: users
+        resources:
+          requests:
+            memory: "32Mi"
+            cpu: "250m"
+          limits:
+            memory: "32Mi"
+            cpu: "500m"
