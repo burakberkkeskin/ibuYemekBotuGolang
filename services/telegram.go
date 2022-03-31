@@ -12,7 +12,6 @@ import (
 )
 
 func TelegramHandler() {
-
 	bot, err := tgbotapi.NewBotAPI(os.Getenv("TELEGRAM_BOT_TOKEN"))
 	if err != nil {
 		log.Panic("Telegram Bot Not Found: ", err)
@@ -23,11 +22,19 @@ func TelegramHandler() {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 	updates := bot.GetUpdatesChan(u)
-
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
 	lunchListToday := getLunchList("today")
 	lunchListTomorrow := getLunchList("tomorrow")
+
+	helloMessage := "-İBU Yemek Listesi Botuna Hoş Geldiniz!\n" +
+		"-Her sabah 9'da yemek listesini almak için abone olun.\n" +
+		"-Abone olmak için /subscribe\n" +
+		"-Abonelikten çıkmak için /unsubscribe\n" +
+		"-Bugünün Listesini öğrenmek için /today\n" +
+		"-Yarının Listesini öğrenmek için /tomorrow\n" +
+		"-Kaynak Kod İçin /source\n" +
+		"-Yardım almak için /help\n"
 
 	c := cron.New()
 	c.AddFunc("30 03 * * *", func() {
@@ -43,15 +50,6 @@ func TelegramHandler() {
 	})
 
 	c.Start()
-
-	helloMessage := "-İBU Yemek Listesi Botuna Hoş Geldiniz!\n" +
-		"-Her sabah 9'da yemek listesini almak için abone olun.\n" +
-		"-Abone olmak için /subscribe\n" +
-		"-Abonelikten çıkmak için /unsubscribe\n" +
-		"-Bugünün Listesini öğrenmek için /today\n" +
-		"-Yarının Listesini öğrenmek için /tomorrow\n" +
-		"-Kaynak Kod İçin /source\n" +
-		"-Yardım almak için /help\n"
 
 	for update := range updates {
 		if update.Message != nil { // If we got a message
