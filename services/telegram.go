@@ -5,14 +5,12 @@ import (
 	"ibuYemekBotu/mongo"
 	"log"
 	"os"
-	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/robfig/cron/v3"
 )
 
 func TelegramHandler() {
-
 	bot, err := tgbotapi.NewBotAPI(os.Getenv("TELEGRAM_BOT_TOKEN"))
 	if err != nil {
 		log.Panic("Telegram Bot Not Found: ", err)
@@ -23,18 +21,14 @@ func TelegramHandler() {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 	updates := bot.GetUpdatesChan(u)
-
 	log.Printf("Authorized on account %s", bot.Self.UserName)
-
-	lunchListToday := getLunchList("today")
-	lunchListTomorrow := getLunchList("tomorrow")
 
 	c := cron.New()
 	c.AddFunc("30 03 * * *", func() {
 		log.Printf("Updating lunch list")
-		lunchListToday = getLunchList("today")
-		lunchListTomorrow = getLunchList("tomorrow")
+		lunchListToday = GetLunchList("today")
 		log.Printf("Lunch list today: %s", lunchListToday)
+		lunchListTomorrow = GetLunchList("tomorrow")
 		log.Printf("Lunch list tomorrow: %s", lunchListTomorrow)
 	})
 
@@ -43,15 +37,6 @@ func TelegramHandler() {
 	})
 
 	c.Start()
-
-	helloMessage := "-İBU Yemek Listesi Botuna Hoş Geldiniz!\n" +
-		"-Her sabah 9'da yemek listesini almak için abone olun.\n" +
-		"-Abone olmak için /subscribe\n" +
-		"-Abonelikten çıkmak için /unsubscribe\n" +
-		"-Bugünün Listesini öğrenmek için /today\n" +
-		"-Yarının Listesini öğrenmek için /tomorrow\n" +
-		"-Kaynak Kod İçin /source\n" +
-		"-Yardım almak için /help\n"
 
 	for update := range updates {
 		if update.Message != nil { // If we got a message
@@ -134,30 +119,5 @@ func sendListSubscribers(lunchList *string, bot *tgbotapi.BotAPI) {
 			bot.Send(msg)
 		}
 		log.Println("List sent")
-	}
-}
-
-func getLunchList(day string) string {
-	log.Println("Getting lunch list of " + day)
-	lunch := scrapper(day)
-	emptyLunch := models.Lunch{Corba: "", AnaYemek: "", YardimciAnaYemek: "", YanYemek1: "", YanYemek2: ""}
-	if lunch == emptyLunch {
-		return ""
-	}
-	lunchString := "Çorba: " + lunch.Corba + "\n" +
-		"Ana Yemek: " + lunch.AnaYemek + "\n" +
-		"İkinci Yemek: " + lunch.YardimciAnaYemek + "\n" +
-		"Yan Yemek: " + lunch.YanYemek1 + "\n" +
-		"Yan Yemek: " + lunch.YanYemek2
-
-	if day == "today" {
-		t := time.Now()
-		lunchString = t.Format("02/01/2006") + "\n" + lunchString
-		return lunchString
-	} else {
-		t := time.Now()
-		t = t.AddDate(0, 0, 1)
-		lunchString = t.Format("02/01/2006") + "\n" + lunchString
-		return lunchString
 	}
 }

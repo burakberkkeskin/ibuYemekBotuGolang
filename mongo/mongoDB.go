@@ -124,7 +124,7 @@ func DeleteUser(chatid int64) bool {
 }
 
 func getEnv() {
-	err := godotenv.Load(".envDev")
+	err := godotenv.Load("./configs/.env.dev")
 	if err != nil {
 		log.Println("Error loading .env file")
 	}

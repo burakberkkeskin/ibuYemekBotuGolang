@@ -1,0 +1,32 @@
+version: '3.8'
+services:  
+  ibuYemekApi:  
+    image: safderun/ibu-yemek-api   
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD", "curl", "http://localhost:3000/healthcheck"]
+      interval: 5s
+      retries: 3
+      start_period: 5s
+    restart: always
+    networks:
+      - ibuYemekNetwork
+
+
+  ibuYemekBotuTest:    
+    image: safderun/ibu-yemek-botu:test    
+    env_file:
+    - configs/.env.dev
+    networks:
+    - ibuYemekNetwork
+    depends_on:
+      ibuYemekApi:
+        condition: service_healthy
+    restart: always
+
+
+   
+networks:
+  ibuYemekNetwork:
+    driver: bridge
