@@ -1,7 +1,8 @@
 version: '3.8'
 services:  
   ibuYemekApi:  
-    image: safderun/ibu-yemek-api   
+    image: safderun/ibu-yemek-api  
+    container_name: ibu-yemek-api 
     ports:
       - "3000:3000"
     healthcheck:
@@ -15,9 +16,10 @@ services:
 
 
   ibuYemekBotuTest:    
-    image: safderun/ibu-yemek-botu:test    
+    image: safderun/ibu-yemek-botu
+    container_name: ibu-yemek-botu
     env_file:
-    - configs/.env.dev
+    - configs/.env
     networks:
     - ibuYemekNetwork
     depends_on:
@@ -30,3 +32,4 @@ services:
 networks:
   ibuYemekNetwork:
     driver: bridge
+    name: ibuYemekNetwork
